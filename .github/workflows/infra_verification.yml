@@ -14,7 +14,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  setup-infra:
+  verify-infra:
     runs-on: ubuntu-latest
     environment: dev
 
