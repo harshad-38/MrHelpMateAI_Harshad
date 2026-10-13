@@ -15,3 +15,5 @@ Search-Layer-Response
 /*.docx
 *.json
 .env
+notebooks
+Policy Documents
