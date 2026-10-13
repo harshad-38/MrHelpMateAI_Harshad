@@ -1,4 +1,4 @@
-param cosmosDBConnection string
+// param cosmosDBConnection string
 param azureStorageConnection string
 param aiSearchConnection string
 param projectName string
@@ -6,7 +6,7 @@ param accountName string
 param projectCapHost string
 param accountCapHost string
 
-var threadConnections = ['${cosmosDBConnection}']
+// var threadConnections = ['${cosmosDBConnection}']
 var storageConnections = ['${azureStorageConnection}']
 var vectorStoreConnections = ['${aiSearchConnection}']
 
@@ -36,7 +36,7 @@ resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/ca
   properties: {
     vectorStoreConnections: vectorStoreConnections
     storageConnections: storageConnections
-    threadStorageConnections: threadConnections
+    // threadStorageConnections: threadConnections
   }
   dependsOn: [
     accountCapabilityHost

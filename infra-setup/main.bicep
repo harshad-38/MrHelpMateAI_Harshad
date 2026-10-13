@@ -81,7 +81,7 @@ var accountName = toLower('${aiServices}${uniqueSuffix}')
 var projectName = toLower('${firstProjectName}${uniqueSuffix}')
 
 
-var cosmosDBName = toLower('${uniqueSuffix}cosmosdb')
+// var cosmosDBName = toLower('${uniqueSuffix}cosmosdb')
 var aiSearchName = toLower('${uniqueSuffix}search')
 var azureStorageName = toLower('${uniqueSuffix}storage')
 var appInsightsName = toLower('${uniqueSuffix}appinsights')
@@ -90,15 +90,15 @@ var logAnalyticsName = toLower('${uniqueSuffix}loganalytics')
 // Check if existing resources have been passed in
 var storagePassedIn = azureStorageAccountResourceId != ''
 var searchPassedIn = aiSearchResourceId != ''
-var cosmosPassedIn = azureCosmosDBAccountResourceId != ''
+// var cosmosPassedIn = azureCosmosDBAccountResourceId != ''
 
 var acsParts = split(aiSearchResourceId, '/')
 var aiSearchServiceSubscriptionId = searchPassedIn ? acsParts[2] : subscription().subscriptionId
 var aiSearchServiceResourceGroupName = searchPassedIn ? acsParts[4] : resourceGroup().name
 
-var cosmosParts = split(azureCosmosDBAccountResourceId, '/')
-var cosmosDBSubscriptionId = cosmosPassedIn ? cosmosParts[2] : subscription().subscriptionId
-var cosmosDBResourceGroupName = cosmosPassedIn ? cosmosParts[4] : resourceGroup().name
+// var cosmosParts = split(azureCosmosDBAccountResourceId, '/')
+// var cosmosDBSubscriptionId = cosmosPassedIn ? cosmosParts[2] : subscription().subscriptionId
+// var cosmosDBResourceGroupName = cosmosPassedIn ? cosmosParts[4] : resourceGroup().name
 
 var storageParts = split(azureStorageAccountResourceId, '/')
 var azureStorageSubscriptionId = storagePassedIn ? storageParts[2] : subscription().subscriptionId
@@ -126,7 +126,7 @@ module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
     location: location
     azureStorageName: azureStorageName
     aiSearchName: aiSearchName
-    cosmosDBName: cosmosDBName
+    // cosmosDBName: cosmosDBName
 
     // AI Search Service parameters
     aiSearchResourceId: aiSearchResourceId
@@ -136,9 +136,9 @@ module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
     azureStorageAccountResourceId: azureStorageAccountResourceId
     azureStorageExists: validateExistingResources.outputs.azureStorageExists
 
-    // Cosmos DB Account
-    cosmosDBResourceId: azureCosmosDBAccountResourceId
-    cosmosDBExists: validateExistingResources.outputs.cosmosDBExists
+    // // Cosmos DB Account
+    // cosmosDBResourceId: azureCosmosDBAccountResourceId
+    // cosmosDBExists: validateExistingResources.outputs.cosmosDBExists
     }
 }
 
@@ -176,9 +176,9 @@ module aiProject 'modules-standard/ai-project-identity.bicep' = {
     aiSearchServiceResourceGroupName: aiDependencies.outputs.aiSearchServiceResourceGroupName
     aiSearchServiceSubscriptionId: aiDependencies.outputs.aiSearchServiceSubscriptionId
 
-    cosmosDBName: aiDependencies.outputs.cosmosDBName
-    cosmosDBSubscriptionId: aiDependencies.outputs.cosmosDBSubscriptionId
-    cosmosDBResourceGroupName: aiDependencies.outputs.cosmosDBResourceGroupName
+    // cosmosDBName: aiDependencies.outputs.cosmosDBName
+    // cosmosDBSubscriptionId: aiDependencies.outputs.cosmosDBSubscriptionId
+    // cosmosDBResourceGroupName: aiDependencies.outputs.cosmosDBResourceGroupName
 
     azureStorageName: aiDependencies.outputs.azureStorageName
     azureStorageSubscriptionId: aiDependencies.outputs.azureStorageSubscriptionId
@@ -228,18 +228,18 @@ module storageAccountRoleAssignment 'modules-standard/azure-storage-account-role
   }
 }
 
-// The Comos DB Operator role must be assigned before the caphost is created
-module cosmosAccountRoleAssignments 'modules-standard/cosmosdb-account-role-assignment.bicep' = {
-  name: 'cosmos-account-ra-${uniqueSuffix}-deployment'
-  scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
-  params: {
-    cosmosDBName: aiDependencies.outputs.cosmosDBName
-    projectPrincipalId: aiProject.outputs.projectPrincipalId
-  }
-  dependsOn: [
-    storageAccountRoleAssignment
-  ]
-}
+// // The Comos DB Operator role must be assigned before the caphost is created
+// module cosmosAccountRoleAssignments 'modules-standard/cosmosdb-account-role-assignment.bicep' = {
+//   name: 'cosmos-account-ra-${uniqueSuffix}-deployment'
+//   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
+//   params: {
+//     cosmosDBName: aiDependencies.outputs.cosmosDBName
+//     projectPrincipalId: aiProject.outputs.projectPrincipalId
+//   }
+//   dependsOn: [
+//     storageAccountRoleAssignment
+//   ]
+// }
 
 // This role can be assigned before or after the caphost is created
 module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bicep' = {
@@ -250,7 +250,8 @@ module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bice
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
   dependsOn:[
-    cosmosAccountRoleAssignments, storageAccountRoleAssignment
+    // cosmosAccountRoleAssignments, storageAccountRoleAssignment
+    storageAccountRoleAssignment
   ]
 }
 
@@ -259,7 +260,7 @@ module addProjectCapabilityHost 'modules-standard/add-project-capability-host.bi
   params: {
     accountName: aiAccount.outputs.accountName
     projectName: aiProject.outputs.projectName
-    cosmosDBConnection: aiProject.outputs.cosmosDBConnection
+    // cosmosDBConnection: aiProject.outputs.cosmosDBConnection
     azureStorageConnection: aiProject.outputs.azureStorageConnection
     aiSearchConnection: aiProject.outputs.aiSearchConnection
 
@@ -267,7 +268,8 @@ module addProjectCapabilityHost 'modules-standard/add-project-capability-host.bi
     accountCapHost: accountCapHost
   }
   dependsOn: [
-    aiSearchRoleAssignments, cosmosAccountRoleAssignments, storageAccountRoleAssignment
+    // aiSearchRoleAssignments, cosmosAccountRoleAssignments, storageAccountRoleAssignment
+    aiSearchRoleAssignments, storageAccountRoleAssignment
   ]
 }
 
@@ -285,16 +287,16 @@ module storageContainersRoleAssignment 'modules-standard/blob-storage-container-
   ]
 }
 
-module cosmosContainerRoleAssignments 'modules-standard/cosmos-container-role-assignments.bicep' = {
-  name: 'cosmos-ra-${uniqueSuffix}-deployment'
-  scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
-  params: {
-    cosmosAccountName: aiDependencies.outputs.cosmosDBName
-    projectWorkspaceId: aiProject.outputs.projectId
-    projectPrincipalId: aiProject.outputs.projectPrincipalId
+// module cosmosContainerRoleAssignments 'modules-standard/cosmos-container-role-assignments.bicep' = {
+//   name: 'cosmos-ra-${uniqueSuffix}-deployment'
+//   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
+//   params: {
+//     cosmosAccountName: aiDependencies.outputs.cosmosDBName
+//     projectWorkspaceId: aiProject.outputs.projectId
+//     projectPrincipalId: aiProject.outputs.projectPrincipalId
 
-  }
-dependsOn: [
-  addProjectCapabilityHost, storageContainersRoleAssignment
-  ]
-}
+//   }
+// dependsOn: [
+//   addProjectCapabilityHost, storageContainersRoleAssignment
+//   ]
+// }
