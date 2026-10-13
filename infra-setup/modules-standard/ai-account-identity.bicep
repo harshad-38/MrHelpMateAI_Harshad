@@ -15,20 +15,20 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   }
   kind: 'AIServices'
   identity: {
-    type: 'SystemAssigned'
+    type: 'SystemAssigned'    //Creating System Assigned Identity
   }
   properties: {
-    allowProjectManagement: true  // Prject management should be allowed to create project inside Foundry
+    allowProjectManagement: true  // Project management should be allowed to create project inside Foundry
     customSubDomainName: accountName
     networkAcls: {
-      defaultAction: 'Allow'
+      defaultAction: 'Allow' //Allowing inbound to all the public networks
       virtualNetworkRules: []
       ipRules: []
     }
     publicNetworkAccess: 'Enabled'
 
     // API-key based auth is not supported for the Agent service
-    disableLocalAuth: false
+    disableLocalAuth: true // Only AAD Auth is allowed on account
   }
 }
 
