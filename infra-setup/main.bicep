@@ -255,23 +255,23 @@ module aiSearchRoleAssignments 'modules-standard/ai-search-role-assignments.bice
   ]
 }
 
-module addProjectCapabilityHost 'modules-standard/add-project-capability-host.bicep' = {
-  name: 'capabilityHost-configuration-${uniqueSuffix}-deployment'
-  params: {
-    accountName: aiAccount.outputs.accountName
-    projectName: aiProject.outputs.projectName
-    // cosmosDBConnection: aiProject.outputs.cosmosDBConnection
-    azureStorageConnection: aiProject.outputs.azureStorageConnection
-    aiSearchConnection: aiProject.outputs.aiSearchConnection
+// module addProjectCapabilityHost 'modules-standard/add-project-capability-host.bicep' = {
+//   name: 'capabilityHost-configuration-${uniqueSuffix}-deployment'
+//   params: {
+//     accountName: aiAccount.outputs.accountName
+//     projectName: aiProject.outputs.projectName
+//     // cosmosDBConnection: aiProject.outputs.cosmosDBConnection
+//     azureStorageConnection: aiProject.outputs.azureStorageConnection
+//     aiSearchConnection: aiProject.outputs.aiSearchConnection
 
-    projectCapHost: projectCapHost
-    accountCapHost: accountCapHost
-  }
-  dependsOn: [
-    // aiSearchRoleAssignments, cosmosAccountRoleAssignments, storageAccountRoleAssignment
-    aiSearchRoleAssignments, storageAccountRoleAssignment
-  ]
-}
+//     projectCapHost: projectCapHost
+//     accountCapHost: accountCapHost
+//   }
+//   dependsOn: [
+//     // aiSearchRoleAssignments, cosmosAccountRoleAssignments, storageAccountRoleAssignment
+//     aiSearchRoleAssignments, storageAccountRoleAssignment
+//   ]
+// }
 
 // The Storage Blob Data Owner role must be assigned before the caphost is created
 module storageContainersRoleAssignment 'modules-standard/blob-storage-container-role-assignments.bicep' = {
@@ -282,9 +282,9 @@ module storageContainersRoleAssignment 'modules-standard/blob-storage-container-
     storageName: aiDependencies.outputs.azureStorageName
     workspaceId: aiProject.outputs.projectId
   }
-  dependsOn: [
-    addProjectCapabilityHost
-  ]
+  // dependsOn: [
+  //   addProjectCapabilityHost
+  // ]
 }
 
 // module cosmosContainerRoleAssignments 'modules-standard/cosmos-container-role-assignments.bicep' = {
