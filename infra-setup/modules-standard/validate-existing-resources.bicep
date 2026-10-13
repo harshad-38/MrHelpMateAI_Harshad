@@ -10,7 +10,7 @@ param azureStorageAccountResourceId string
 @description('ResourceId of Cosmos DB Account')
 param azureCosmosDBAccountResourceId string
 
-// Check if existing resources have been passed in
+// Check if existing resources have been passed in, Please Check
 var storagePassedIn = azureStorageAccountResourceId != ''
 var searchPassedIn = aiSearchResourceId != ''
 var cosmosPassedIn = azureCosmosDBAccountResourceId != ''
