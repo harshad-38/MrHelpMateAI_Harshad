@@ -8,9 +8,9 @@ param aiSearchName string
 param aiSearchServiceResourceGroupName string
 param aiSearchServiceSubscriptionId string
 
-param cosmosDBName string
-param cosmosDBSubscriptionId string
-param cosmosDBResourceGroupName string
+// param cosmosDBName string
+// param cosmosDBSubscriptionId string
+// param cosmosDBResourceGroupName string
 
 param azureStorageName string
 param azureStorageSubscriptionId string
@@ -20,10 +20,10 @@ resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' exis
   name: aiSearchName
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
 }
-resource cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2024-12-01-preview' existing = {
-  name: cosmosDBName
-  scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
-}
+// resource cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2024-12-01-preview' existing = {
+//   name: cosmosDBName
+//   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
+// }
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: azureStorageName
   scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
@@ -46,20 +46,21 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
     displayName: displayName
   }
 
-  // Child Resource of the project: 1 Cosmos DB Account
-  resource project_connection_cosmosdb_account 'connections@2025-04-01-preview' = {
-    name: cosmosDBName
-    properties: {
-      category: 'CosmosDB'
-      target: cosmosDBAccount.properties.documentEndpoint
-      authType: 'AAD'
-      metadata: {
-        ApiType: 'Azure'
-        ResourceId: cosmosDBAccount.id
-        location: cosmosDBAccount.location
-      }
-    }
-  }
+  // // Child Resource of the project: 1 Cosmos DB Account
+  // resource project_connection_cosmosdb_account 'connections@2025-04-01-preview' = {
+  //   name: cosmosDBName
+  //   properties: {
+  //     category: 'CosmosDB'
+  //     target: cosmosDBAccount.properties.documentEndpoint
+  //     authType: 'AAD'
+  //     metadata: {
+  //       ApiType: 'Azure'
+  //       ResourceId: cosmosDBAccount.id
+  //       location: cosmosDBAccount.location
+  //     }
+  //   }
+  // }
+
   // Child Resource of the project: 2 Azure Storage Account
   resource project_connection_azure_storage 'connections@2025-04-01-preview' = {
     name: azureStorageName
@@ -100,6 +101,6 @@ output projectPrincipalId string = project.identity.principalId
 // output projectWorkspaceId string = project.properties.internalid
 
 // BYO connection names
-output cosmosDBConnection string = cosmosDBName
+// output cosmosDBConnection string = cosmosDBName
 output azureStorageConnection string = azureStorageName
 output aiSearchConnection string = aiSearchName
