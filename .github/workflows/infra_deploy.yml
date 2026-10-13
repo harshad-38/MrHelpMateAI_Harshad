@@ -22,9 +22,6 @@ jobs:
     env:
       RG_NAME: ${{ vars.RESOURCE_GROUP }}
       TEMPLATE_PATH: infra-setup/main.bicep
-      CLIENT_ID: ${{ secrets.OIDC_AZURE_CLIENT_ID }}
-      TENANT_ID: ${{ secrets.OIDC_AZURE_TENANT_ID }}
-      SUBSCRIPTION_ID: ${{ secrets.OIDC_AZURE_SUBSCRIPTION_ID }}
 
     steps:
       - name: Check out repository
@@ -37,9 +34,9 @@ jobs:
         uses: azure/login@v2
         with:
           with:
-          client-id: $CLIENT_ID
-          tenant-id: $TENANT_ID
-          subscription-id: $SUBSCRIPTION_ID
+            client-id: ${{ secrets.OIDC_AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.OIDC_AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.OIDC_AZURE_SUBSCRIPTION_ID }}
 
       - name: Install Azure ML CLI
         run: az extension add -n ml -y
