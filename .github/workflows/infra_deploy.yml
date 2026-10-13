@@ -1,0 +1,85 @@
+
+name: Deploy Infrastructure on Pull Request
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+jobs:
+  setup-infra:
+    if: >-
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/deploy-infra')
+    runs-on: ubuntu-latest
+    environment: dev
+
+    env:
+      RG_NAME: ${{ vars.RESOURCE_GROUP }}
+      TEMPLATE_PATH: infra-setup/main.bicep
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # you explicitly check out the head of the pull request that received the comment.
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: Sign in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.OIDC_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.OIDC_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.OIDC_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure ML CLI
+        run: az extension add -n ml -y
+
+      - name: Run Infra Setup Command
+        run: |
+          az deployment group create \
+            --resource-group "$RG_NAME" \
+            --template-file "$TEMPLATE_PATH" \
+            --parameters aiServices=myai firstProjectName=myai-proj
+
+  report-status:
+    name: Report Infrastructure Status
+    needs: setup-infra
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Comment Status on Pull Request
+        uses: actions/github-script@v7
+        env:
+          INFRA_RESULT: ${{ needs.setup-infra.result }}
+        with:
+          script: |
+            const result = process.env.INFRA_RESULT;
+
+            const statusLabels = {
+              success: 'Completed',
+              failure: 'Failed',
+              cancelled: 'Cancelled',
+              skipped: 'Skipped'
+            };
+
+            const status = statusLabels[result] ?? result;
+            const prNumber = context.payload.pull_request.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `Infrastructure deployment status: **${status}**.
+
+              [View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            });
